@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Poul A Beer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #game-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-size: 24px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #time {
+      position: absolute;
+      top: 50px;
+      left: 20px;
+      color: #fff;
+      font-size: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #speed {
+      position: absolute;
+      top: 80px;
+      left: 20px;
+      color: #aaa;
+      font-size: 16px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #beer-meter {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 150px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid #c4a35a;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    #beer-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top, #f5a623, #ffd93d);
+      transition: height 0.1s ease-out;
+      position: relative;
+    }
+
+    #beer-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(to bottom, #fffef0, rgba(255,254,240,0.3));
+      border-radius: 2px;
+    }
+
+    #beer-percent {
+      position: absolute;
+      top: 175px;
+      right: 20px;
+      width: 40px;
+      text-align: center;
+      color: #f5a623;
+      font-size: 14px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #beer-label {
+      position: absolute;
+      top: 195px;
+      right: 12px;
+      width: 56px;
+      text-align: center;
+      color: #aaa;
+      font-size: 11px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Powerup indicators */
+    #powerup-container {
+      position: absolute;
+      top: 220px;
+      right: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .powerup-indicator {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border-left: 3px solid;
+    }
+
+    .powerup-indicator.active {
+      display: flex;
+    }
+
+    .powerup-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+
+    .powerup-timer {
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      min-width: 30px;
+    }
+
+    .powerup-name {
+      font-size: 11px;
+      color: #aaa;
+      max-width: 60px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #powerup-goldenBeer { border-color: #ffd700; }
+    #powerup-goldenBeer .powerup-icon { background: linear-gradient(135deg, #ffd700, #ffed4a); }
+
+    #powerup-magnet { border-color: #3498db; }
+    #powerup-magnet .powerup-icon { background: linear-gradient(135deg, #3498db, #5dade2); }
+
+    #powerup-shield { border-color: #2ecc71; }
+    #powerup-shield .powerup-icon { background: linear-gradient(135deg, #2ecc71, #58d68d); }
+
+    #powerup-speedSurge { border-color: #e74c3c; }
+    #powerup-speedSurge .powerup-icon { background: linear-gradient(135deg, #e74c3c, #f1948a); }
+
+    #powerup-slowMo { border-color: #9b59b6; }
+    #powerup-slowMo .powerup-icon { background: linear-gradient(135deg, #9b59b6, #bb8fce); }
+
+    #powerup-ghost { border-color: #ecf0f1; }
+    #powerup-ghost .powerup-icon { background: linear-gradient(135deg, #ecf0f1, #fff); }
+
+    #powerup-doubleScore { border-color: #f39c12; }
+    #powerup-doubleScore .powerup-icon { background: linear-gradient(135deg, #f39c12, #f7dc6f); }
+
+    /* Powerup pickup notification */
+    #powerup-notification {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 20px currentColor, 2px 2px 4px rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: opacity 0.3s ease-out;
+      pointer-events: none;
+    }
+
+    #powerup-notification.show {
+      opacity: 1;
+      animation: powerupPop 0.5s ease-out;
+    }
+
+    @keyframes powerupPop {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    /* Intro slides */
+    #intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a0a12;
+      z-index: 200;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+      transition: opacity 1s ease-out;
+    }
+
+    #intro-overlay.visible {
+      display: flex;
+    }
+
+    #intro-overlay.fade-out {
+      opacity: 0;
+    }
+
+    .intro-slide {
+      position: absolute;
+      text-align: center;
+      color: #fff;
+      max-width: 800px;
+      padding: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .intro-slide.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .intro-slide h2 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #f5a623;
+      text-shadow: 0 0 20px rgba(245, 166, 35, 0.5);
+    }
+
+    .intro-slide p {
+      font-size: 24px;
+      line-height: 1.6;
+      color: #ccc;
+      margin-bottom: 15px;
+    }
+
+    .intro-slide .year {
+      font-size: 48px;
+      font-weight: bold;
+      color: #f5a623;
+      margin-bottom: 10px;
+    }
+
+    .intro-slide .highlight {
+      color: #f5a623;
+      font-weight: bold;
+    }
+
+    .intro-slide .license-text {
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #f5a623;
+      text-align: left;
+      color: #aaa;
+      line-height: 1.8;
+    }
+
+    .intro-slide .big-number {
+      font-size: 72px;
+      font-weight: bold;
+      color: #f5a623;
+      text-shadow: 0 0 30px rgba(245, 166, 35, 0.6);
+      margin: 20px 0;
+    }
+
+    .intro-slide .zero {
+      color: #e74c3c;
+      text-shadow: 0 0 30px rgba(231, 76, 60, 0.6);
+    }
+
+    .intro-slide .small-text {
+      font-size: 16px;
+      color: #888;
+    }
+
+    .intro-slide .dramatic {
+      font-size: 28px;
+      color: #e74c3c;
+      margin-top: 30px;
+    }
+
+    #skip-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* Menu Overlay - solid background */
+    #menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      z-index: 150;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #menu-overlay.hidden {
+      display: none;
+    }
+
+    /* Menu Screens */
+    .menu-screen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #fff;
+      pointer-events: auto;
+      min-width: 350px;
+    }
+
+    .menu-screen h1 {
+      font-size: 56px;
+      margin-bottom: 10px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+      color: #f5a623;
+    }
+
+    .menu-screen h2 {
+      font-size: 36px;
+      margin-bottom: 25px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      color: #4ecdc4;
+    }
+
+    .menu-screen h3 {
+      font-size: 18px;
+      margin: 15px 0 8px 0;
+      color: #f5a623;
+    }
+
+    .menu-screen .tagline {
+      font-size: 18px;
+      color: #ccc;
+      margin-bottom: 30px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .menu-btn {
+      width: 220px;
+      padding: 12px 20px;
+      font-size: 16px;
+    }
+
+    .menu-content {
+      text-align: left;
+      background: rgba(0,0,0,0.3);
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      max-width: 400px;
+    }
+
+    .menu-content p {
+      margin-bottom: 10px;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .menu-content .highlight {
+      color: #f5a623;
+      font-weight: bold;
+    }
+
+    .menu-content .warning {
+      color: #e74c3c;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group p {
+      margin-bottom: 5px;
+    }
+
+    .key {
+      display: inline-block;
+      background: #444;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      color: #fff;
+      border: 1px solid #666;
+    }
+
+    .credits {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #444;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .setting-label {
+      font-size: 18px;
+      color: #ccc;
+    }
+
+    .toggle-btn {
+      width: 80px;
+      padding: 8px 15px;
+      font-size: 14px;
+    }
+
+    .toggle-btn.off {
+      background: #666;
+    }
+
+    #game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #fff;
+      pointer-events: auto;
+      display: none;
+    }
+
+    #game-over h2 {
+      font-size: 42px;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    }
+
+    #game-over .final-stats {
+      margin-bottom: 25px;
+    }
+
+    #game-over .final-score {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .game-over-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    #final-rating {
+      font-size: 72px;
+      font-weight: bold;
+      margin: 10px 0 20px 0;
+      text-shadow: 0 0 20px currentColor;
+    }
+
+    #final-rating.rating-S { color: #ffd700; }
+    #final-rating.rating-A { color: #4ecdc4; }
+    #final-rating.rating-B { color: #45b7aa; }
+    #final-rating.rating-C { color: #f5a623; }
+    #final-rating.rating-D { color: #e67e22; }
+    #final-rating.rating-F { color: #e74c3c; }
+
+    .btn {
+      background: #4ecdc4;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.3s;
+      pointer-events: auto;
+    }
+
+    .btn:hover {
+      background: #45b7aa;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <!-- Intro slides overlay -->
+  <div id="intro-overlay">
+    <div class="intro-slide" id="slide-1">
+      <div class="year">1994</div>
+      <p>A Danish programmer named <span class="highlight">Poul-Henning Kamp</span><br>began contributing to open source.</p>
+    </div>
+
+    <div class="intro-slide" id="slide-2">
+      <h2>He built critical infrastructure</h2>
+      <p><span class="highlight">md5crypt</span> - securing passwords worldwide<br>
+      <span class="highlight">FreeBSD Jails</span> - pioneering containerization<br>
+      <span class="highlight">Varnish Cache</span> - accelerating the web<br>
+      <span class="highlight">phkmalloc</span> - used by Netscape and Cisco</p>
+    </div>
+
+    <div class="intro-slide" id="slide-3">
+      <h2>He gave it all away</h2>
+      <p>Even creating his own maximally permissive license...</p>
+      <div class="license-text">
+        /* ----------------------------------------------------------------------------<br>
+        * "THE BEER-WARE LICENSE" (Revision 42):<br>
+        * &lt;phk@FreeBSD.ORG&gt; wrote this file. As long as you retain this notice you<br>
+        * can do whatever you want with this stuff. If we meet some day, and you think<br>
+        * this stuff is worth it, you can buy me a beer in return. Poul-Henning Kamp<br>
+        * ----------------------------------------------------------------------------<br>
+        */
+      </div>
+    </div>
+
+    <div class="intro-slide" id="slide-4">
+      <h2>His code is critical to</h2>
+      <p>Every iPhone. Every Mac.</p>
+      <p>Every PlayStation. Every Nintendo Switch.</p>
+    </div>
+
+    <div class="intro-slide" id="slide-5">
+      <h2>Depended on by</h2>
+      <p>Apple. Sony. Nintendo. Netflix.</p>
+      <p>Meta. Cisco. Juniper. Spotify.</p>
+    </div>
+
+    <div class="intro-slide" id="slide-6">
+      <p>These companies are worth</p>
+      <div class="big-number" style="color: #4ecdc4;">$5+ Trillion</div>
+    </div>
+
+    <div class="intro-slide" id="slide-7">
+      <h2>Trillions of dollars in commerce</h2>
+      <p>flow through systems he helped build</p>
+      <p style="margin-top: 20px;" class="small-text">Every day. Every second.</p>
+    </div>
+
+    <div class="intro-slide" id="slide-8">
+      <p>Only some of his projects use the Beerware license.</p>
+      <p>Most use the BSD license.</p>
+      <p style="margin-top: 30px;">But still...</p>
+    </div>
+
+    <div class="intro-slide" id="slide-9">
+      <h2>Beers received by Poul-Henning Kamp</h2>
+      <p class="small-text">(from these companies)</p>
+      <div class="big-number zero">0</div>
+    </div>
+
+    <div class="intro-slide" id="slide-10">
+      <div class="big-number" style="font-size: 56px;">GET POUL A BEER</div>
+    </div>
+
+    <div id="skip-hint">Press SPACE or click to continue</div>
+  </div>
+
+  <div id="ui-overlay">
+    <div id="score">Distance: 0</div>
+    <div id="time">Time: 0:00</div>
+    <div id="speed">Speed: 1.0x</div>
+
+    <div id="beer-meter">
+      <div id="beer-fill"></div>
+    </div>
+    <div id="beer-percent">100%</div>
+    <div id="beer-label">BEER</div>
+
+    <!-- Powerup indicators -->
+    <div id="powerup-container">
+      <div class="powerup-indicator" id="powerup-goldenBeer">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">5.0</span>
+      </div>
+      <div class="powerup-indicator" id="powerup-magnet">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">8.0</span>
+      </div>
+      <div class="powerup-indicator" id="powerup-shield">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">10.0</span>
+      </div>
+      <div class="powerup-indicator" id="powerup-speedSurge">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">5.0</span>
+      </div>
+      <div class="powerup-indicator" id="powerup-slowMo">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">6.0</span>
+      </div>
+      <div class="powerup-indicator" id="powerup-ghost">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">4.0</span>
+      </div>
+      <div class="powerup-indicator" id="powerup-doubleScore">
+        <div class="powerup-icon"></div>
+        <span class="powerup-timer">10.0</span>
+      </div>
+    </div>
+
+    <!-- Powerup pickup notification -->
+    <div id="powerup-notification"></div>
+
+    <div id="game-over">
+      <h2>BEER EMPTY!</h2>
+      <div id="final-rating">F</div>
+      <div class="final-stats">
+        <div class="final-score">Distance: <span id="final-score">0</span></div>
+        <div class="final-score">Time: <span id="final-time">0:00</span></div>
+        <div class="final-score">Avg Speed: <span id="final-avg-speed">0</span></div>
+        <div class="final-score" style="color: #f5a623;">Beer Left: <span id="final-beer">0%</span></div>
+      </div>
+      <div class="game-over-buttons">
+        <button class="btn" id="restart-btn">TRY AGAIN</button>
+        <button class="btn" id="menu-btn" style="background: #666;">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Overlay (separate from game UI) -->
+  <div id="menu-overlay">
+    <!-- Main Menu -->
+    <div id="main-menu" class="menu-screen">
+      <h1>GET POUL A BEER</h1>
+      <div class="menu-buttons">
+        <button class="btn menu-btn" id="play-btn">PLAY</button>
+        <button class="btn menu-btn" id="howto-btn">HOW TO PLAY</button>
+        <button class="btn menu-btn" id="about-btn">ABOUT</button>
+        <button class="btn menu-btn" id="settings-btn">SETTINGS</button>
+      </div>
+    </div>
+
+    <!-- How to Play Screen -->
+    <div id="howto-screen" class="menu-screen" style="display: none;">
+      <h2>HOW TO PLAY</h2>
+      <div class="menu-content">
+        <div class="control-group">
+          <h3>Movement</h3>
+          <p><span class="key">A</span> / <span class="key">←</span> - Move Left</p>
+          <p><span class="key">D</span> / <span class="key">→</span> - Move Right</p>
+        </div>
+        <div class="control-group">
+          <h3>Actions</h3>
+          <p><span class="key">W</span> / <span class="key">↑</span> / <span class="key">SPACE</span> - Jump</p>
+          <p><span class="key">S</span> / <span class="key">↓</span> - Slide</p>
+        </div>
+        <div class="control-group">
+          <h3>Goal</h3>
+          <p>GET POUL A BEER</p>
+        </div>
+      </div>
+      <button class="btn menu-btn" id="howto-back-btn">BACK</button>
+    </div>
+
+    <!-- About Screen -->
+    <div id="about-screen" class="menu-screen" style="display: none;">
+      <h2>ABOUT</h2>
+      <div class="menu-content">
+        <p>GET POUL A BEER</p>
+        <p>Contribute at <a href="https://github.com/jring-o/project-omaha" target="_blank" style="color: #4ecdc4;">github.com/jring-o/project-omaha</a></p>
+      </div>
+      <button class="btn menu-btn" id="about-back-btn">BACK</button>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings-screen" class="menu-screen" style="display: none;">
+      <h2>SETTINGS</h2>
+      <div class="menu-content">
+        <div class="setting-row">
+          <span class="setting-label">Sound</span>
+          <button class="btn toggle-btn" id="sound-toggle">ON</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Music</span>
+          <button class="btn toggle-btn" id="music-toggle">ON</button>
+        </div>
+      </div>
+      <button class="btn menu-btn" id="settings-back-btn">BACK</button>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

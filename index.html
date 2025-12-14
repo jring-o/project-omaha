@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Omaha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            background-image:
+                radial-gradient(ellipse at top, #1a0a2e 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, #0a1a2e 0%, transparent 50%);
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            text-shadow:
+                0 0 10px #ff00ff,
+                0 0 20px #ff00ff,
+                0 0 40px #ff00ff;
+            animation: flicker 3s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 95%, 100% { opacity: 1; }
+            96% { opacity: 0.8; }
+            97% { opacity: 1; }
+            98% { opacity: 0.9; }
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            letter-spacing: 2px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            justify-items: center;
+        }
+
+        .game-card {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+            border: 3px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: #ff00ff;
+            box-shadow:
+                0 0 20px rgba(255, 0, 255, 0.5),
+                0 0 40px rgba(255, 0, 255, 0.3),
+                inset 0 0 20px rgba(255, 0, 255, 0.1);
+        }
+
+        .game-card:hover::before {
+            border-color: #00ffff;
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .game-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: #16213e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-thumbnail .placeholder {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        .game-info {
+            padding: 25px;
+        }
+
+        .game-title {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .game-description {
+            font-size: 0.6rem;
+            line-height: 1.8;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .play-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: transparent;
+            border: 2px solid #ff00ff;
+            color: #ff00ff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .play-btn:hover {
+            background: #ff00ff;
+            color: #000;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+
+        /* Insert coin animation */
+        .insert-coin {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 0.7rem;
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .game-title {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Omaha</h1>
+            <p class="subtitle">Select Your Game</p>
+        </header>
+
+        <div class="games-grid">
+            <div class="game-card" onclick="location.href='2347/index.html'">
+                <div class="game-thumbnail">
+                    <span class="placeholder">🎮</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">2347</h2>
+                    <p class="game-description">A strategic puzzle game that will test your mind.</p>
+                    <a href="2347/index.html" class="play-btn">Play</a>
+                </div>
+            </div>
+
+            <div class="game-card" onclick="location.href='get-poul-a-beer/index.html'">
+                <div class="game-thumbnail">
+                    <span class="placeholder">🍺</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Get Poul a Beer</h2>
+                    <p class="game-description">A 3D endless runner. Help Poul on his quest!</p>
+                    <a href="get-poul-a-beer/index.html" class="play-btn">Play</a>
+                </div>
+            </div>
+        </div>
+
+        <p class="insert-coin">Select a game to begin</p>
+    </div>
+</body>
+</html>

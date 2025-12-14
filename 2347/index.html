@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOWER DEFENDER 2347 - 3D Space Shooter</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <!-- Cinematic Overlay -->
+    <div id="cinematic-overlay">
+        <div id="cinematic-text"></div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1>TOWER DEFENDER</h1>
+        <h2>2347</h2>
+        <p class="subtitle">Inspired by XKCD #2347</p>
+        <button class="start-btn" id="btn-start">DEFEND THE INFRASTRUCTURE</button>
+        <button class="settings-btn" id="btn-controls">CONTROLS</button>
+        <div class="instructions" id="controls-display">
+            <p><span id="disp-forward">W</span>/<span id="disp-backward">S</span>/<span id="disp-left">A</span>/<span id="disp-right">D</span> - Move Ship | <span>MOUSE</span> - Aim</p>
+            <p><span id="disp-fire">LEFT CLICK</span> - Fire | <span id="disp-altfire">RIGHT CLICK</span> - Alt Fire</p>
+            <p><span id="disp-boost">SPACE</span> - Boost | <span id="disp-up">Q</span>/<span id="disp-down">E</span> - Vertical</p>
+            <p><span id="disp-weapon1">1</span>/<span id="disp-weapon2">2</span>/<span id="disp-weapon3">3</span> - Weapons | <span id="disp-repair">R</span> - Repair | <span>ESC</span> - Pause</p>
+        </div>
+    </div>
+
+    <!-- Services Panel (Digital Garden) -->
+    <div id="services-panel">
+        <div class="services-header">YOUR DIGITAL LIFE</div>
+        <div id="services-grid"></div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div class="hud-panel hud-left">
+            <div class="stat-label">SCORE</div>
+            <div class="stat-value" id="score">0</div>
+            <div class="stat-label" style="margin-top:10px">FUNDING</div>
+            <div class="stat-value funding" id="funding">$0</div>
+        </div>
+        <div class="hud-panel hud-center">
+            <div class="stat-label">INFRASTRUCTURE INTEGRITY</div>
+            <div class="health-bar-container">
+                <div class="health-bar" id="tower-health"></div>
+            </div>
+            <div class="stat-value" id="tower-health-text">100%</div>
+        </div>
+        <div class="hud-panel hud-right">
+            <div class="stat-label">WAVE</div>
+            <div class="stat-value" id="wave">1</div>
+            <div class="stat-label" style="margin-top:10px">THREATS</div>
+            <div class="stat-value" id="enemies">0</div>
+        </div>
+    </div>
+
+    <!-- Active Powerups Display -->
+    <div id="active-powerups"></div>
+
+    <div id="crosshair"></div>
+    <div id="wave-announcement"></div>
+    <div id="boss-announcement"></div>
+    <div id="damage-flash"></div>
+
+    <!-- Notification Containers -->
+    <div id="powerup-notifications"></div>
+    <div id="upgrade-notifications"></div>
+
+    <!-- Educational Text Overlay -->
+    <div id="educational-overlay">
+        <div id="educational-text"></div>
+        <div id="educational-continue">Press SPACE to continue</div>
+    </div>
+
+    <!-- Weapon Indicator -->
+    <div id="weapon-indicator">
+        <div class="weapon-slot active" id="weapon-1">[1] LASER</div>
+        <div class="weapon-slot" id="weapon-2">[2] SPREAD</div>
+        <div class="weapon-slot" id="weapon-3">[3] MISSILE</div>
+    </div>
+
+    <!-- Minimap -->
+    <div id="minimap">
+        <canvas id="minimap-canvas"></canvas>
+    </div>
+
+    <!-- Cockpit Overlay (First Person View) -->
+    <div id="cockpit-overlay">
+        <div class="cockpit-frame">
+            <div class="frame-strut frame-strut-left"></div>
+            <div class="frame-strut frame-strut-right"></div>
+            <div class="frame-strut frame-strut-center"></div>
+            <div class="corner-frame corner-tl"></div>
+            <div class="corner-frame corner-tr"></div>
+        </div>
+        <div class="glass-reflection"></div>
+        <div class="cockpit-reticle">
+            <div class="reticle-ring"></div>
+            <div class="reticle-crosshair top"></div>
+            <div class="reticle-crosshair bottom"></div>
+            <div class="reticle-crosshair left"></div>
+            <div class="reticle-crosshair right"></div>
+            <div class="reticle-center"></div>
+        </div>
+        <div class="hud-speed">
+            <div class="hud-speed-label">VELOCITY</div>
+            <span id="cockpit-speed">0</span>
+        </div>
+        <div class="hud-altitude">
+            <div class="hud-altitude-label">ALTITUDE</div>
+            <span id="cockpit-altitude">50</span>
+        </div>
+        <div class="warning-panel">
+            <div class="warning-light shields" id="warn-shields" title="Shields"></div>
+            <div class="warning-light weapons" id="warn-weapons" title="Weapons"></div>
+            <div class="warning-light hull" id="warn-hull" title="Hull"></div>
+            <div class="warning-light engine" id="warn-engine" title="Engine"></div>
+        </div>
+        <div class="cockpit-dashboard">
+            <div class="dashboard-surface"></div>
+            <div class="dashboard-displays">
+                <div class="mfd-left">
+                    <div class="mfd-screen">
+                        <div class="mfd-scanlines"></div>
+                        <div class="mfd-title">RADAR</div>
+                        <div class="radar-display">
+                            <div class="radar-grid"></div>
+                            <div class="radar-sweep"></div>
+                            <canvas id="radar-canvas" width="100" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="center-instruments">
+                    <div class="attitude-indicator">
+                        <div class="attitude-ball" id="attitude-ball"></div>
+                        <div class="attitude-wings"></div>
+                    </div>
+                    <div class="instrument-row">
+                        <div class="gauge-container">
+                            <div class="gauge-label">THROTTLE</div>
+                            <div class="gauge-value" id="throttle-value">0%</div>
+                            <div class="gauge-bar-bg">
+                                <div class="gauge-bar-fill" id="throttle-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="gauge-container">
+                            <div class="gauge-label">SHIELD</div>
+                            <div class="gauge-value" id="shield-value">100%</div>
+                            <div class="gauge-bar-bg">
+                                <div class="gauge-bar-fill" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="instrument-row">
+                        <div class="gauge-container">
+                            <div class="gauge-label">TOWER</div>
+                            <div class="gauge-value" id="tower-value">100%</div>
+                            <div class="gauge-bar-bg">
+                                <div class="gauge-bar-fill" id="tower-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="gauge-container">
+                            <div class="gauge-label">ENERGY</div>
+                            <div class="gauge-value" id="energy-value">100%</div>
+                            <div class="gauge-bar-bg">
+                                <div class="gauge-bar-fill" id="energy-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mfd-right">
+                    <div class="weapon-display">
+                        <div class="mfd-scanlines"></div>
+                        <div class="mfd-title">WEAPONS</div>
+                        <div class="weapon-status">
+                            <div class="weapon-name" id="cockpit-weapon">LASER</div>
+                            <div class="weapon-ammo">
+                                <span>READY</span>
+                                <span id="cockpit-ammo">∞</span>
+                            </div>
+                            <div class="ammo-bar">
+                                <div class="ammo-fill" id="ammo-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mfd-services">
+                    <div class="services-display">
+                        <div class="mfd-scanlines"></div>
+                        <div class="mfd-title">SVC</div>
+                        <div class="services-grid-compact" id="services-grid-compact"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="throttle-assembly">
+                <div class="throttle-label">THR</div>
+                <div class="throttle-track">
+                    <div class="throttle-notches">
+                        <div class="throttle-notch"></div>
+                        <div class="throttle-notch"></div>
+                        <div class="throttle-notch"></div>
+                        <div class="throttle-notch"></div>
+                        <div class="throttle-notch"></div>
+                    </div>
+                    <div class="throttle-handle" id="throttle-handle"></div>
+                </div>
+            </div>
+            <div class="joystick-assembly">
+                <div class="joystick-stick" id="joystick-stick">
+                    <div class="joystick-grip">
+                        <div class="joystick-trigger" id="joystick-trigger"></div>
+                    </div>
+                </div>
+                <div class="joystick-base"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over -->
+    <div id="game-over">
+        <h1>INFRASTRUCTURE COLLAPSED</h1>
+        <div id="game-over-message" class="end-message"></div>
+        <div class="final-score">Final Score: <span id="final-score">0</span></div>
+        <div class="final-score">Waves Survived: <span id="final-waves">0</span></div>
+        <div class="final-score">Funding Raised: $<span id="final-funding">0</span></div>
+        <button class="start-btn" id="btn-restart">TRY AGAIN</button>
+    </div>
+
+    <!-- Victory -->
+    <div id="victory-screen">
+        <h1>OPEN SOURCE PREVAILS!</h1>
+        <div id="victory-message" class="end-message"></div>
+        <div class="final-score">Final Score: <span id="victory-score">0</span></div>
+        <div class="final-score">All 10 Waves Defended!</div>
+        <div class="final-score">Total Funding Raised: $<span id="victory-funding">0</span></div>
+        <button class="start-btn" id="btn-play-again">PLAY AGAIN</button>
+    </div>
+
+    <!-- Shop Overlay -->
+    <div id="shop-overlay">
+        <div id="shop-content"></div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pause-menu">
+        <h1>PAUSED</h1>
+        <button class="pause-btn" id="btn-resume">RESUME</button>
+        <button class="pause-btn secondary" id="btn-pause-controls">CONTROLS</button>
+        <button class="pause-btn secondary" id="btn-quit">QUIT TO MENU</button>
+    </div>
+
+    <!-- Controls Settings Modal -->
+    <div id="controls-modal">
+        <div class="controls-panel">
+            <h2>CONTROL SETTINGS</h2>
+            <div class="controls-section">
+                <h3>MOVEMENT</h3>
+                <div class="control-row">
+                    <span class="control-label">Move Forward</span>
+                    <button class="control-key" data-action="forward">W</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Move Backward</span>
+                    <button class="control-key" data-action="backward">S</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Strafe Left</span>
+                    <button class="control-key" data-action="left">A</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Strafe Right</span>
+                    <button class="control-key" data-action="right">D</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Move Up</span>
+                    <button class="control-key" data-action="up">E</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Move Down</span>
+                    <button class="control-key" data-action="down">Q</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Boost / Thrust</span>
+                    <button class="control-key" data-action="boost">SPACE</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Reverse</span>
+                    <button class="control-key" data-action="reverse">SHIFT</button>
+                </div>
+            </div>
+            <div class="controls-section">
+                <h3>COMBAT</h3>
+                <div class="control-row">
+                    <span class="control-label">Fire Primary</span>
+                    <button class="control-key" data-action="fire">MOUSE 1</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Fire Secondary / Missile</span>
+                    <button class="control-key" data-action="altfire">MOUSE 2</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Weapon 1 (Laser)</span>
+                    <button class="control-key" data-action="weapon1">1</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Weapon 2 (Spread)</span>
+                    <button class="control-key" data-action="weapon2">2</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Weapon 3 (Missile)</span>
+                    <button class="control-key" data-action="weapon3">3</button>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">Repair Tower</span>
+                    <button class="control-key" data-action="repair">R</button>
+                </div>
+            </div>
+            <div class="controls-section">
+                <h3>MOUSE & FLIGHT SETTINGS</h3>
+                <div class="mouse-settings">
+                    <div class="toggle-setting">
+                        <span class="control-label">Invert Mouse X</span>
+                        <div class="toggle-switch" id="toggle-invertX"></div>
+                    </div>
+                    <div class="toggle-setting">
+                        <span class="control-label">Invert Mouse Y</span>
+                        <div class="toggle-switch" id="toggle-invertY"></div>
+                    </div>
+                    <div class="toggle-setting">
+                        <span class="control-label">Invert Pitch</span>
+                        <div class="toggle-switch" id="toggle-invertPitch"></div>
+                    </div>
+                </div>
+                <div class="slider-setting" style="margin-top: 15px;">
+                    <div class="slider-header">
+                        <span class="control-label">Mouse Sensitivity</span>
+                        <span class="slider-value" id="sensitivity-value">1.0</span>
+                    </div>
+                    <input type="range" class="slider-input" id="sensitivity-slider"
+                           min="0.1" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="slider-setting" style="margin-top: 15px;">
+                    <div class="slider-header">
+                        <span class="control-label">Aim Smoothing</span>
+                        <span class="slider-value" id="smoothing-value">8</span>
+                    </div>
+                    <input type="range" class="slider-input" id="smoothing-slider"
+                           min="1" max="20" step="1" value="8">
+                </div>
+            </div>
+            <div class="controls-buttons">
+                <button class="controls-btn save" id="btn-save-controls">SAVE</button>
+                <button class="controls-btn reset" id="btn-reset-controls">RESET DEFAULTS</button>
+                <button class="controls-btn close" id="btn-close-controls">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls-hint">[ESC] Pause</div>
+
+    <div id="pointer-lock-overlay">
+        <h3>CLICK TO LOCK MOUSE</h3>
+        <p>Mouse controls ship rotation</p>
+        <p>WASD to strafe, QE up/down</p>
+        <p>Press ESC to unlock</p>
+    </div>
+
+    <div id="loading">INITIALIZING DEFENSE SYSTEMS...</div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+
+    <!-- Game Modules -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
