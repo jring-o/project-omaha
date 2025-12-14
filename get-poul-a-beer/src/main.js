@@ -83,6 +83,7 @@ const mainMenu = document.getElementById('main-menu');
 const howtoScreen = document.getElementById('howto-screen');
 const aboutScreen = document.getElementById('about-screen');
 const settingsScreen = document.getElementById('settings-screen');
+const pauseOverlay = document.getElementById('pause-overlay');
 
 // Game variables
 let clock = new THREE.Clock();
@@ -218,7 +219,7 @@ function init() {
   initTrack(scene);
   initObstacles(scene);
   initPlayer(scene);
-  initInput(startGame, restartGame);
+  initInput(startGame, restartGame, togglePause);
 
   // Initialize audio system
   initAudio();
@@ -263,6 +264,12 @@ function setupMenuListeners() {
 
   // Game over -> main menu
   if (menuBtn) menuBtn.addEventListener('click', returnToMainMenu);
+
+  // Pause menu buttons
+  const resumeBtn = document.getElementById('resume-btn');
+  const pauseMainMenuBtn = document.getElementById('pause-main-menu-btn');
+  if (resumeBtn) resumeBtn.addEventListener('click', unpauseGame);
+  if (pauseMainMenuBtn) pauseMainMenuBtn.addEventListener('click', pauseReturnToMainMenu);
 
   // Settings toggles
   if (soundToggle) {
@@ -368,6 +375,35 @@ function returnToMainMenu() {
   showMainMenu();
 }
 
+
+
+// Pause game functions
+function togglePause() {
+  if (!gameState.isRunning || gameState.isGameOver) return;
+  
+  if (gameState.isPaused) {
+    unpauseGame();
+  } else {
+    pauseGame();
+  }
+}
+
+function pauseGame() {
+  gameState.isPaused = true;
+  if (pauseOverlay) pauseOverlay.classList.add('visible');
+  stopMusic();
+}
+
+function unpauseGame() {
+  gameState.isPaused = false;
+  if (pauseOverlay) pauseOverlay.classList.remove('visible');
+  startMusic();
+}
+
+function pauseReturnToMainMenu() {
+  unpauseGame();
+  returnToMainMenu();
+}
 // Restart skips intro
 function restartGame() {
   startGameActual();

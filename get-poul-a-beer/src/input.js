@@ -10,14 +10,16 @@ const keys = {
 
 let onStartCallback = null;
 let onRestartCallback = null;
+let onPauseCallback = null;
 
 // Debounce for lane switching
 let lastLaneSwitch = 0;
 const laneSwitchCooldown = 150; // ms
 
-export function initInput(onStart, onRestart) {
+export function initInput(onStart, onRestart, onPause) {
   onStartCallback = onStart;
   onRestartCallback = onRestart;
+  onPauseCallback = onPause;
 
   // Keyboard events
   window.addEventListener('keydown', handleKeyDown);
@@ -97,7 +99,7 @@ function handleKeyDown(event) {
       break;
 
     case 'Escape':
-      // Could add pause functionality here
+      if (onPauseCallback) onPauseCallback();
       break;
   }
 }

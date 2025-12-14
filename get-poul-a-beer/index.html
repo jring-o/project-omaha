@@ -527,6 +527,67 @@
     .btn:hover {
       background: #45b7aa;
     }
+
+    /* Pause Menu */
+    #pause-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 175;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #pause-overlay.visible {
+      display: flex;
+    }
+
+    #pause-menu {
+      text-align: center;
+      color: #fff;
+    }
+
+    #pause-menu h2 {
+      font-size: 48px;
+      margin-bottom: 40px;
+      color: #f5a623;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .pause-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .pause-btn {
+      width: 250px;
+      padding: 15px 30px;
+      font-size: 18px;
+      background: #4ecdc4;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .pause-btn:hover {
+      background: #45b7aa;
+    }
+
+    .pause-btn.secondary {
+      background: #666;
+    }
+
+    .pause-btn.secondary:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
@@ -725,6 +786,19 @@
         </div>
       </div>
       <button class="btn menu-btn" id="settings-back-btn">BACK</button>
+    </div>
+  </div>
+
+
+  <!-- Pause Menu Overlay -->
+  <div id="pause-overlay">
+    <div id="pause-menu">
+      <h2>PAUSED</h2>
+      <div class="pause-buttons">
+        <button class="pause-btn" id="resume-btn">RESUME</button>
+        <button class="pause-btn secondary" id="pause-main-menu-btn">MAIN MENU</button>
+        <button class="pause-btn secondary" onclick="location.href='../'">RETURN TO OMAHA</button>
+      </div>
     </div>
   </div>
 
