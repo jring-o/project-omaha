@@ -29,10 +29,15 @@ export function initInput(onStart, onRestart, onPause) {
   setupTouchControls();
 
   // Button click events (restart button only - play button handled in main.js)
+  // Added touch support for Safari
   const restartBtn = document.getElementById('restart-btn');
 
   if (restartBtn) {
     restartBtn.addEventListener('click', () => {
+      if (onRestartCallback) onRestartCallback();
+    });
+    restartBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
       if (onRestartCallback) onRestartCallback();
     });
   }

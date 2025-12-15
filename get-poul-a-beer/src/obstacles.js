@@ -76,6 +76,15 @@ function createObstacle(config, typeName) {
     bottomY: config.bottomY || 0,
   };
 
+  // Add down arrow to slideBarrier
+  if (typeName === 'slideBarrier') {
+    const arrowMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.5, 3), arrowMat);
+    arrow.rotation.x = Math.PI;  // Point down
+    arrow.position.set(0, -0.5, -0.3);  // Slightly lower, close to barrier
+    mesh.add(arrow);
+  }
+
   return mesh;
 }
 

@@ -155,12 +155,12 @@ export const CONFIG = {
         color: 0xe74c3c,    // Light red
       },
       slideBarrier: {
-        width: 2.8,
+        width: 2.0,         // Reduced from 2.8 to stay within single lane
         height: 4,          // Tall wall - can't jump over
         depth: 0.3,
         color: 0x9b59b6,    // Purple - visually distinct
         elevated: true,     // Flag for special positioning
-        bottomY: 0.8,       // Gap at bottom - must slide under
+        bottomY: 1.2,       // Gap at bottom - must slide under (increased from 0.8)
       },
     },
   },
@@ -252,7 +252,7 @@ export const CONFIG = {
     // Invincibility after obstacle hit
     hitInvincibilityDuration: 1.5,  // seconds
     // Speed penalty when hitting obstacle
-    hitSpeedPenalty: 0.4,   // Multiply speed by this (60% reduction)
+    hitSpeedPenalty: 0.6,   // Multiply speed by this (40% reduction, was 60%)
   },
 
   // Visual settings

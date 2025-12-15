@@ -104,13 +104,21 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Also advance intro on click (but not on the initial button click)
+// Also advance intro on click/touch (but not on the initial button click)
 let introClickEnabled = false;
 window.addEventListener('click', (e) => {
   if (introActive && introClickEnabled) {
     advanceIntro();
   }
 });
+
+// Touch support for Mobile Safari - advance intro on tap
+window.addEventListener('touchend', (e) => {
+  if (introActive && introClickEnabled) {
+    e.preventDefault();
+    advanceIntro();
+  }
+}, { passive: false });
 
 // Intro sequence configuration
 const introSlideIds = [
@@ -251,8 +259,14 @@ function setupMenuListeners() {
   const soundToggle = document.getElementById('sound-toggle');
   const musicToggle = document.getElementById('music-toggle');
 
-  // Main menu navigation
-  if (playBtn) playBtn.addEventListener('click', startGame);
+  // Main menu navigation (with touch support for Safari)
+  if (playBtn) {
+    playBtn.addEventListener('click', startGame);
+    playBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      startGame();
+    });
+  }
   if (howtoBtn) howtoBtn.addEventListener('click', showHowtoScreen);
   if (aboutBtn) aboutBtn.addEventListener('click', showAboutScreen);
   if (settingsBtn) settingsBtn.addEventListener('click', showSettingsScreen);
@@ -546,9 +560,9 @@ function checkCollisions() {
         // Play obstacle hit sound
         playSound('obstacleHit');
 
-        // Slow down
+        // Slow down (but maintain minimum speed to keep jumps possible)
         gameState.speed *= CONFIG.beer.hitSpeedPenalty;
-        gameState.speed = Math.max(gameState.speed, CONFIG.speed.initial * 0.5);
+        gameState.speed = Math.max(gameState.speed, CONFIG.speed.initial * 0.75);
 
         // Start invincibility period
         gameState.isInvincible = true;
