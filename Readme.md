@@ -10,7 +10,7 @@ Fair warning: much of the code here is AI-generated slop. It's rough, experiment
 
 ## Games
 
-- **2347** — A strategic puzzle game
+- **2347** — A 3D space shooter inspired by [XKCD #2347](https://xkcd.com/2347/). Defend critical open source infrastructure from threats!
 - **Get Poul a Beer** — A 3D endless runner. Help Poul on his quest!
 
 ## Getting Started
