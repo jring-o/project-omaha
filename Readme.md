@@ -1,5 +1,18 @@
 # Project Omaha
 
+A retro-styled arcade game portal experimenting with ways to tell the stories of open source through games.
+
+## About
+
+This project is an experiment in interactive storytelling — exploring how games can capture and share the culture, history, and personalities of open source communities. Each game is a small tribute to the people, projects, and culture that shape the open source world.
+
+Fair warning: much of the code here is AI-generated slop. It's rough, experimental, and prioritizes "does it work?" over "is it elegant?" Consider yourself warned.
+
+## Games
+
+- **2347** — A strategic puzzle game
+- **Get Poul a Beer** — A 3D endless runner. Help Poul on his quest!
+
 ## Getting Started
 
 ### Prerequisites
